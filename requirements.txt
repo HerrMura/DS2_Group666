@@ -1,0 +1,8 @@
+python==3.9
+pytorch==1.13.1
+opencv
+streamlit==1.11.0
+h5py
+tqdm
+moviepy
+scikit-image
