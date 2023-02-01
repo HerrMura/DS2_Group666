@@ -103,8 +103,8 @@ def zoom_detail(result_name, point_upper_left_x, point_upper_left_y, point_lower
     except:
         pass
     try:
-        if os.path.exists(result_name['SROP']):
-            show_detail(result_name['SROP'], box, selected_size)
+        if os.path.exists(result_name['SRPO']):
+            show_detail(result_name['SRPO'], box, selected_size)
     except:
         pass
     try:
@@ -121,8 +121,8 @@ def zoom_img(result_name):
     
     if os.path.exists(result_name['SRCNN']):
         img = cv2.imread(result_name['SRCNN'])
-    elif os.path.exists(result_name['SROP']):
-        img = cv2.imread(result_name['SROP'])
+    elif os.path.exists(result_name['SRPO']):
+        img = cv2.imread(result_name['SRPO'])
     elif os.path.exists(result_name['Bicubic']):
         img = cv2.imread(result_name['Bicubic'])
     else:
@@ -186,7 +186,7 @@ if checkbox_image_super_resolution:
     #---------利用训练后的模型进行测试------------
     st.header('Test')
     #选择模型按钮
-    model_options = st.multiselect('Model Selection', ['SRCNN', 'SROP', 'Bicubic'])
+    model_options = st.multiselect('Model Selection', ['SRCNN', 'SRPO', 'Bicubic'])
     #选择待测试图片按钮
     uploaded_image = st.file_uploader("Choose an Image")
     #Denoise参数
@@ -196,7 +196,7 @@ if checkbox_image_super_resolution:
     if model_options is not None and uploaded_image is not None and image_option_scale is not None:
         image_result_name = {
             'SRCNN' : uploaded_image.name.replace('.', '_SRCNN_x{}.'.format(image_option_scale)), 
-            'SROP' : uploaded_image.name.replace('.', '_SROP_x{}.'.format(image_option_scale)), 
+            'SRPO' : uploaded_image.name.replace('.', '_SRPO_x{}.'.format(image_option_scale)), 
             'Bicubic' : uploaded_image.name.replace('.', '_Bicubic_x{}.'.format(image_option_scale))}
     
     if model_options is not None and uploaded_image is not None:
@@ -230,7 +230,7 @@ if checkbox_video_super_reslolution:
     #---------利用训练后的模型进行测试------------
     st.header('Test')
     #选择模型按钮
-    video_option_model = "SROP"
+    video_option_model = "SRPO"
     #选择待测试图片按钮
     uploaded_video = st.file_uploader("Choose a Video")
     #Denoise参数
