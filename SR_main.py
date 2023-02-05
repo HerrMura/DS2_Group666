@@ -22,6 +22,7 @@ from utils import tensor2img
 from CUGAN import img_Denoise,video_Denoise
 import time
 
+
 def get_SR_result(image_file, scale, model, denoise=False):
     """ 
         Get the result of Super-Resolution based on one of the models.
@@ -31,30 +32,27 @@ def get_SR_result(image_file, scale, model, denoise=False):
             
             :py:data:`SRCNN`: A light and classic Super-Resolution model based on Convolutional Neural Network(CNN).
             
-            :py:data:`SROP`: A light model based on CNN, good at anti-aliasing, has better effect on images rendered by game engine. 
+            :py:data:`SRPO`: A light model based on CNN, good at anti-aliasing, has better effect on images rendered by game engine. 
     """
     tic = time.perf_counter()
     image = pil_image.open(image_file).convert('RGB')
     
     if model=='SRCNN':
         SR_result=get_srcnn(image_file, scale)
-        if denoise==True:
-            SR_result=img_Denoise(SR_result)
-        else:
-            SR_result=SR_result.filter(ImageFilter.SMOOTH)
-            SR_result=SR_result.filter(ImageFilter.SHARPEN)
         SR_result.save(image_file.name.replace('.', '_SRCNN_x{}.'.format(scale)))
-    elif model=='SROP':
+        
+    elif model=='SRPO':
         SR_result=get_srop(image_file, scale)
         if denoise==True:
             SR_result=img_Denoise(SR_result)
+            SR_result.save(image_file.name.replace('.', '_SRPO_x{}.'.format(scale)))
         else:
-            SR_result=SR_result.filter(ImageFilter.SMOOTH)
-            SR_result=SR_result.filter(ImageFilter.SHARPEN)
-        SR_result.save(image_file.name.replace('.', '_SROP_x{}.'.format(scale)))
+            SR_result.save(image_file.name.replace('.', '_SRPO_x{}.'.format(scale)))
+        
     elif model=='Bicubic':
         SR_result = image.resize((image.width * scale, image.height * scale), resample=pil_image.Resampling.BICUBIC)
         SR_result.save(image_file.name.replace('.', '_bicubic_x{}.'.format(scale)))
+        
     
     toc = time.perf_counter()
     print('Consuming time:'+str(toc-tic))
@@ -98,7 +96,8 @@ def get_Video_result(video_path, scale, denoise=False):
                 left=0
             for j in range(frame_batch.shape[0]):
                 image = pil_image.fromarray(coll[i*batch_size+j]).convert('RGB')
-                lr=image.filter(ImageFilter.SHARPEN)
+                #lr=image.filter(ImageFilter.SHARPEN)
+                lr=image
                 lr = np.array(lr).astype(np.float32)
                 frame_batch[j]=lr
                 flat = image.resize((hr_width, hr_height), resample=pil_image.LANCZOS)
@@ -113,23 +112,21 @@ def get_Video_result(video_path, scale, denoise=False):
                     sr_img=SR_result[k]
                     sr_img=tensor2img(sr_img)
                     sr_img=sr_img.resize((sr_img.width // 2, sr_img.height // 2), resample=pil_image.Resampling.BICUBIC)  
-                    sr_img.save('Video_method/VSROP/frame'+str(frame_num)+'.jpg')
+                    sr_img.save('Video_method/VSRPO/frame'+str(frame_num)+'.jpg')
                     frame_num=frame_num+1
                     bar.update(1)
             else:
                 for k in range(SR_result.shape[0]):
                     sr_img=SR_result[k]
                     sr_img=tensor2img(sr_img)
-                    sr_img=sr_img.filter(ImageFilter.SMOOTH)
-                    sr_img=sr_img.filter(ImageFilter.SHARPEN)   
-                    sr_img.save('Video_method/VSROP/frame'+str(frame_num)+'.jpg')
+                    sr_img.save('Video_method/VSRPO/frame'+str(frame_num)+'.jpg')
                     frame_num=frame_num+1
                     bar.update(1)
     print("SR done")
     
     print("merging frames into video...")
     # frame2video
-    im_dir = 'Video_method/VSROP/'
+    im_dir = 'Video_method/VSRPO/'
     video_output_dir = 'Output/output.mp4' # path of the output video
     fps = 30
     frame2video(im_dir,video_output_dir,fps)
@@ -162,11 +159,11 @@ def get_Video_result(video_path, scale, denoise=False):
         shutil.rmtree('Video_method/V2F')
         os.mkdir('Video_method/V2F')
 
-    if not os.path.exists('Video_method/VSROP'):
-        os.mkdir('Video_method/VSROP')
+    if not os.path.exists('Video_method/VSRPO'):
+        os.mkdir('Video_method/VSRPO')
     else:
-        shutil.rmtree('Video_method/VSROP')
-        os.mkdir('Video_method/VSROP')
+        shutil.rmtree('Video_method/VSRPO')
+        os.mkdir('Video_method/VSRPO')
     
     toc = time.perf_counter()    
     print('Consuming time:'+str(toc-tic))
@@ -177,13 +174,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--file', type=str, required=True)
     parser.add_argument('--scale', type=int, required=True)
-    parser.add_argument('--model', type=str, default='SROP')
+    parser.add_argument('--model', type=str, default='SRPO')
     parser.add_argument('--type', type=str, default='image')
     args = parser.parse_args()
+    denoise=False
     if args.type=='image':        
-        SR_result=get_SR_result(args.file, args.scale, args.model, denoise=True)
+        SR_result=get_SR_result(args.file, args.scale, args.model, denoise)
     elif args.type=='video':
-        Vid_result=get_Video_result(args.file, args.scale, denoise=True)
+        Vid_result=get_Video_result(args.file, args.scale, denoise)
     else:
         print("Please assign the type as image or video")
     

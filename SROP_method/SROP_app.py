@@ -34,7 +34,7 @@ def get_srop(image_file_dir, scale):
     model.eval()
     with torch.no_grad():
         lr = image
-        lr=lr.filter(ImageFilter.SHARPEN)
+        #lr=lr.filter(ImageFilter.SHARPEN)
         #hr_width=image.width * scale
         #hr_height=image.height * scale
         #sr_flat = lr.resize((hr_width, hr_height), resample=pil_image.LANCZOS)

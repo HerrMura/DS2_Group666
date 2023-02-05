@@ -248,7 +248,10 @@ if checkbox_video_super_reslolution:
             with st.spinner('Wait for it...'):
                 Vid_result = get_Video_result(uploaded_video.name, video_option_scale, denoise_video)
                 st.caption("Result")
-                video_result = open('./Output/Final.mp4', 'rb')
+                if denoise_video==True: 
+                    video_result = open('./Output/Final_denoised.mp4', 'rb')
+                else:
+                    video_result = open('./Output/Final.mp4', 'rb')
                 video_result_bytes = video_result.read()
                 st.video(video_result_bytes)
             st.success('Done!')
